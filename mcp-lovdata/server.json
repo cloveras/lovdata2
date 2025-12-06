@@ -1,0 +1,11 @@
+{
+  "name": "lovdata2-local",
+  "command": [
+    "/Users/cl/Dev/lovdata2/mcp-lovdata/venv/bin/python3",
+    "server.py"
+  ],
+  "workingDirectory": "/Users/cl/Dev/lovdata2/mcp-lovdata",
+  "env": {
+    "LOVDATA2_DATA_ROOT": "/Users/cl/Dev/lovdata2/data"
+  }
+}t s
