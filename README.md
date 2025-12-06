@@ -16,7 +16,7 @@ alternative API designs.
 
 ## API
 
-The [Lovdata API]((https://api.lovdata.no/swagger).) is, technically speaking, a "REST API",
+The [Lovdata API](https://api.lovdata.no/swagger) is, technically speaking, a "REST API",
 but it behaves more like a file download service than something that actually follows REST principles:
 The URIs, methods, and structure feel more like "hey, here are some files" than a clean, resource-oriented interface.
 
