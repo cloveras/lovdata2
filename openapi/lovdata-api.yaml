@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
-  title: Lovdata Best Practice API
+  title: Lovdata Example API
   version: "1.0.0"
   description: |
-    A modern, best-practice REST API design for accessing Norwegian laws and central
+    A _quickly made example_ of a modern, best-practice REST API design for accessing Norwegian laws and central
     regulations, built from Lovdata's public datasets.
 
     This specification is **not** the official Lovdata API, but a demonstration of how
