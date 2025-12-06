@@ -2,31 +2,40 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Lovdata2 API Documentation</title>
+    <title>lovdata2 API – Swagger UI</title>
 
-    <script
-      src="https://cdn.jsdelivr.net/npm/@redocly/elements/dist/elements.min.js"
-      type="module"
-    ></script>
-
+    <!-- Swagger UI CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css"
+    />
     <style>
       body {
         margin: 0;
         padding: 0;
-        font-family: sans-serif;
       }
-      elements-api {
-        display: block;
+      #swagger-ui {
         height: 100vh;
       }
     </style>
   </head>
-
   <body>
-    <elements-api
-      api-url="openapi/lovdata-api.yaml"
-      router="hash"
-      layout="sidebar"
-    ></elements-api>
+    <div id="swagger-ui"></div>
+
+    <!-- Swagger UI bundle -->
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script>
+      window.onload = () => {
+        window.ui = SwaggerUIBundle({
+          // For GitHub Pages + local dev via http.server:
+          url: "openapi/lovdata-api.yaml",
+
+          dom_id: "#swagger-ui",
+          deepLinking: true,
+          presets: [SwaggerUIBundle.presets.apis],
+          layout: "BaseLayout"
+        });
+      };
+    </script>
   </body>
 </html>
