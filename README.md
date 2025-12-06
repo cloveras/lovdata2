@@ -19,11 +19,11 @@ available datasets. These scripts generate a simplified, machine-readable datase
 Lovdata’s editorial markup, suitable for research, indexing, or experimentation with
 alternative API designs.
 
-### API documentation
-
 ReDoc version of the OpenAPI specification: https://cloveras.github.io/lovdata2/api.html
 
 ### Workflow
+
+Scripots to retrieve the data from Lovdata, prettify XML, etc:
 
 ```bash
 python3 scripts/download_raw.py
@@ -33,7 +33,7 @@ python3 scripts/build_dataset.py
 
 ## MCP Integration (Model Context Protocol)
 
-Lovdata2 includes a skeleton for a local MCP server so you can use Claude Desktop to
+Lovdata2 includes an example of a local MCP server so you can use Claude Desktop to
 interactively query your private Lovdata dataset.
 
 This provides a chat interface where Claude can:
@@ -43,4 +43,8 @@ This provides a chat interface where Claude can:
 - Use tool calls to analyze Norwegian legislation  
 - Do all processing **fully offline** (no legal data leaves your machine)
 
-To keep the main README focused, full MCP setup instructions live here: [README-mcp.md](README-mcp.md)
+To keep this main README small, full MCP setup instructions live here: [README-mcp.md](README-mcp.md)
+
+Here is one example of using Claude with the local MCP and dataset:
+
+![MCP example in Claude desktop](mcp-lovdata/mcp-example.png)
