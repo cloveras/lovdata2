@@ -27,6 +27,8 @@ data/**
 !data/examples/**
 !data/cleaned/
 !data/cleaned/**
+package-lock.json
+package.json
 
 ### Generated OpenAPI JSON
 openapi/lovdata-api.json
