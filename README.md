@@ -23,9 +23,9 @@ https://api.lovdata.no/swagger
 
 Scripts to retrieve and process the public Lovdata datasets:
 
-* scripts/download_raw.py — Downloads the official Lovdata tarballs (laws and central regulations) into raw/.
-* scripts/prepare_xml.py — Extracts, normalizes, and pretty-prints the raw XML into xml_pretty/ for parsing.
-* scripts/build_dataset.py — Builds HTML, Markdown, and JSON versions and generates cleaned metadata for local use and tooling.
+* [scripts/download_raw.py](scripts/download_raw.py) — Downloads the official Lovdata tarballs (laws and central regulations) into raw/.
+* [scripts/prepare_xml.py](scripts/prepare_xml.py) — Extracts, normalizes, and pretty-prints the raw XML into xml_pretty/ for parsing.
+* [scripts/build_dataset.py](scripts/build_dataset.py) — Builds HTML, Markdown, and JSON versions and generates cleaned metadata for local use and tooling.
 
 ## MCP Integration
 
