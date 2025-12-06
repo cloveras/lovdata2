@@ -31,7 +31,7 @@ Every tool uses only your local filesystem.
 - macOS (Linux works too; Windows WSL works)
 - Python 3.10+  
 - Claude Desktop 1.4+ (with MCP support)
-- A local Lovdata2 dataset (generated with [`download_raw`](scripts/download_raw.py), [`prepare_xml`](scripts/prepare_xml.py), etc.)
+- A local Lovdata2 dataset (generated with [`scripts/download_raw.py`](scripts/download_raw.py), [`scripts/prepare_xml.py`](scripts/prepare_xml.py), etc.)
 
 Your dataset should live here or similar:
 
