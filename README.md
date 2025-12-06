@@ -1,11 +1,13 @@
 # lovdata2
 
 This tiny hobby project contains:
-* A rapid [API prototype](#api)
-  showing how the Lovdata API might look if redesigned according to modern REST best practices.
-* A [MCP server example]() of how to search the local content with Claude desktop
 
-The repository also includes tools for downloading and processing Lovdata’s publicly
+* A rapid [API spec prototype](#api) showing how the Lovdata API might look if redesigned
+  according to modern REST best practices.
+* A [MCP server example]() of how to search the local content with
+ [Claude desktop](https://www.claude.com/download).
+
+The repository also includes [scrips](#scripts) for downloading and processing Lovdata’s publicly
 available datasets. These scripts generate a simplified, machine-readable dataset without
 Lovdata’s editorial markup, suitable for research, indexing, or experimentation with
 alternative API designs.
@@ -19,7 +21,7 @@ ReDoc version of the OpenAPI specification: https://cloveras.github.io/lovdata2/
 It is not the official Lovdata API — see the real version here:
 https://api.lovdata.no/swagger
 
-### Workflow
+## Scripts
 
 Scripts to retrieve and process the public Lovdata datasets:
 
