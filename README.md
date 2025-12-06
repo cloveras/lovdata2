@@ -2,8 +2,10 @@
 
 This tiny hobby project contains:
 
-* A rapid [API spec prototype](#api) showing how the Lovdata API might look if redesigned
-  according to modern REST best practices.
+* A rapid [API spec prototype](#api)
+ showing how the
+ [Lovdata API](https://api.lovdata.no/swagger)
+  might look if redesigned according to modern REST best practices.
 * A [MCP server example]() of how to search the local content with
  [Claude desktop](https://www.claude.com/download).
 
@@ -14,12 +16,15 @@ alternative API designs.
 
 ## API
 
-The goal is to illustrate how Norwegian laws and regulations could be exposed through a
-clean, predictable, developer-friendly REST interface.
-ReDoc version of the OpenAPI specification: https://cloveras.github.io/lovdata2/api.html
+The [Lovdata API]((https://api.lovdata.no/swagger).) is, technically speaking, a ‘REST API’,
+but it behaves more like a download service than something that actually follows REST principles:
+The URIs, methods, and structure feel more like
+‘hey, here are some files’ than a clean, resource-oriented interface.”
 
-It is not the official Lovdata API — see the real version here:
-https://api.lovdata.no/swagger
+The goal here is to illustrate how Norwegian laws and regulations could be exposed through a
+clean, predictable, developer-friendly REST interface, in
+[OpenAPI 3.1](https://github.com/cloveras/lovdata2/blob/main/openapi/lovdata-api.yaml)
+and [Swagger UI](https://cloveras.github.io/lovdata2/api.html).
 
 ## Scripts
 
