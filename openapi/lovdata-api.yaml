@@ -17,15 +17,9 @@ info:
     - JSON-first, with optional HTML representations
     - Explicit rate-limit headers
 
-  contact:
-    name: API Maintainer
-    url: https://github.com/your-org/lovdata-best-practice-api
-    email: you@example.com
   license:
     name: Creative Commons Attribution 4.0 International
     identifier: CC-BY-4.0
-
-jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 
 servers:
   - url: https://api.lovdata.example/v1
@@ -62,12 +56,15 @@ paths:
           description: Free-text search in title and short title
           schema:
             type: string
+            minLength: 1
+            maxLength: 200
         - name: year
           in: query
           description: Filter by year of main enactment date
           schema:
             type: integer
             minimum: 1600
+            maximum: 2100
         - name: status
           in: query
           description: Filter by legal status
@@ -128,7 +125,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Law"
             text/html:
-              description: Pre-rendered HTML representation of the law
+              schema:
+                type: string
+                description: Pre-rendered HTML representation of the law
         "404":
           $ref: "#/components/responses/NotFound"
 
@@ -187,7 +186,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Section"
             text/html:
-              description: Pre-rendered HTML representation of the section
+              schema:
+                type: string
+                description: Pre-rendered HTML representation of the section
         "404":
           $ref: "#/components/responses/NotFound"
 
@@ -207,12 +208,15 @@ paths:
           description: Free-text search in title and short title
           schema:
             type: string
+            minLength: 1
+            maxLength: 200
         - name: year
           in: query
           description: Filter by year of main enactment date
           schema:
             type: integer
             minimum: 1600
+            maximum: 2100
         - name: status
           in: query
           description: Filter by legal status
@@ -271,7 +275,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Regulation"
             text/html:
-              description: Pre-rendered HTML representation of the regulation
+              schema:
+                type: string
+                description: Pre-rendered HTML representation of the regulation
         "404":
           $ref: "#/components/responses/NotFound"
 
@@ -322,7 +328,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Section"
             text/html:
-              description: Pre-rendered HTML representation of the section
+              schema:
+                type: string
+                description: Pre-rendered HTML representation of the section
         "404":
           $ref: "#/components/responses/NotFound"
 
@@ -342,6 +350,7 @@ paths:
           schema:
             type: string
             minLength: 1
+            maxLength: 200
         - name: scope
           in: query
           description: Limit search to specific types
@@ -400,6 +409,8 @@ components:
       schema:
         type: string
         pattern: "^lov-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]+$"
+        minLength: 15
+        maxLength: 40
     regulationId:
       name: regulationId
       in: path
@@ -408,6 +419,8 @@ components:
       schema:
         type: string
         pattern: "^forskrift-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]+$"
+        minLength: 20
+        maxLength: 50
     sectionNumber:
       name: sectionNumber
       in: path
@@ -415,6 +428,8 @@ components:
       description: Section number (without the § symbol), e.g. `1`, `2`, `3a`.
       schema:
         type: string
+        minLength: 1
+        maxLength: 10
         example: "1"
     page:
       name: page
@@ -423,6 +438,7 @@ components:
       schema:
         type: integer
         minimum: 1
+        maximum: 10000
         default: 1
     pageSize:
       name: page_size
@@ -439,43 +455,34 @@ components:
       description: Maximum number of requests allowed in the current window.
       schema:
         type: integer
+        minimum: 1
         example: 200
     X-RateLimit-Remaining:
       description: Number of requests remaining in the current window.
       schema:
         type: integer
+        minimum: 0
         example: 199
     X-RateLimit-Reset:
       description: UNIX timestamp when the current rate limit window resets.
       schema:
         type: integer
+        minimum: 0
         example: 1700000123
 
   responses:
     NotFound:
       description: Resource not found
       content:
-        application/json:
+        application/problem+json:
           schema:
             $ref: "#/components/schemas/Error"
-          examples:
-            notFound:
-              summary: Resource not found
-              value:
-                error: not_found
-                message: Resource not found
     BadRequest:
       description: Invalid request parameters
       content:
-        application/json:
+        application/problem+json:
           schema:
             $ref: "#/components/schemas/Error"
-          examples:
-            badRequest:
-              summary: Invalid query parameter
-              value:
-                error: bad_request
-                message: Invalid `page_size` parameter, must be between 1 and 200.
 
   schemas:
     Status:
@@ -491,7 +498,9 @@ components:
           type: string
           format: date
           description: Date of the latest underlying dataset update.
-      required: [status, version]
+      required:
+        - status
+        - version
 
     LawSummary:
       type: object
@@ -499,20 +508,24 @@ components:
       properties:
         id:
           type: string
-          description: Law identifier (`lawId`)
+          description: Law identifier (`lawId`).
           example: "lov-1884-06-14-3"
         refId:
           type: string
-          description: Original refID from dataset
+          description: Original refID from dataset.
           example: "lov/1884-06-14-3"
         title:
           type: string
+          minLength: 1
+          maxLength: 300
         shortTitle:
           type: string
+          minLength: 1
+          maxLength: 200
         date:
           type: string
           format: date
-          description: Main enactment date
+          description: Main enactment date.
         status:
           type: string
           enum: [active, repealed, historical]
@@ -520,9 +533,10 @@ components:
           type: array
           items:
             type: string
+            minLength: 1
+            maxLength: 200
         links:
           type: object
-          additionalProperties: false
           properties:
             self:
               type: string
@@ -532,7 +546,12 @@ components:
               type: string
               format: uri
               example: "https://lovdata.example.no/laws/lov-1884-06-14-3"
-      required: [id, title, date, status, links]
+      required:
+        - id
+        - title
+        - date
+        - status
+        - links
 
     Law:
       allOf:
@@ -559,16 +578,20 @@ components:
       properties:
         id:
           type: string
-          description: Regulation identifier (`regulationId`)
+          description: Regulation identifier (`regulationId`).
           example: "forskrift-2006-10-27-1196"
         refId:
           type: string
-          description: Original refID from dataset
+          description: Original refID from dataset.
           example: "forskrift/2006-10-27-1196"
         title:
           type: string
+          minLength: 1
+          maxLength: 300
         shortTitle:
           type: string
+          minLength: 1
+          maxLength: 200
         date:
           type: string
           format: date
@@ -579,9 +602,10 @@ components:
           type: array
           items:
             type: string
+            minLength: 1
+            maxLength: 200
         links:
           type: object
-          additionalProperties: false
           properties:
             self:
               type: string
@@ -590,7 +614,12 @@ components:
             html:
               type: string
               format: uri
-      required: [id, title, date, status, links]
+      required:
+        - id
+        - title
+        - date
+        - status
+        - links
 
     Regulation:
       allOf:
@@ -615,36 +644,48 @@ components:
       description: Minimal representation of a section.
       properties:
         lawId:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
         regulationId:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
         number:
           type: string
+          minLength: 1
+          maxLength: 10
           example: "1"
         label:
           type: string
+          minLength: 1
+          maxLength: 20
           example: "§ 1"
         title:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
+          maxLength: 300
         links:
           type: object
-          additionalProperties: false
           properties:
             self:
               type: string
               format: uri
             law:
-              type: string
+              type:
+                - string
+                - "null"
               format: uri
-              nullable: true
             regulation:
-              type: string
+              type:
+                - string
+                - "null"
               format: uri
-              nullable: true
-      required: [number, label, links]
+      required:
+        - number
+        - label
+        - links
 
     Section:
       allOf:
@@ -664,7 +705,7 @@ components:
             fullText:
               type: string
               description: Full plain-text representation of the section.
-              example: "Blir det i forbindelse med nedleggelse eller reparasjon ..."
+              maxLength: 20000
             references:
               type: array
               items:
@@ -695,6 +736,8 @@ components:
           minimum: 1
         page_size:
           type: integer
+          minimum: 1
+          maximum: 200
         total:
           type: integer
           minimum: 0
@@ -702,7 +745,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LawSummary"
-      required: [page, page_size, total, items]
+      required:
+        - page
+        - page_size
+        - total
+        - items
 
     PaginatedRegulationList:
       type: object
@@ -712,6 +759,8 @@ components:
           minimum: 1
         page_size:
           type: integer
+          minimum: 1
+          maximum: 200
         total:
           type: integer
           minimum: 0
@@ -719,7 +768,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/RegulationSummary"
-      required: [page, page_size, total, items]
+      required:
+        - page
+        - page_size
+        - total
+        - items
 
     PaginatedSectionList:
       type: object
@@ -729,6 +782,8 @@ components:
           minimum: 1
         page_size:
           type: integer
+          minimum: 1
+          maximum: 200
         total:
           type: integer
           minimum: 0
@@ -736,7 +791,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SectionSummary"
-      required: [page, page_size, total, items]
+      required:
+        - page
+        - page_size
+        - total
+        - items
 
     SearchResultItem:
       type: object
@@ -746,37 +805,46 @@ components:
           enum: [law, regulation, section]
         score:
           type: number
-          format: float
         lawId:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
         regulationId:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
         sectionNumber:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
         title:
           type: string
+          minLength: 1
+          maxLength: 300
         snippet:
           type: string
           description: Text fragment with query terms highlighted or centered.
         links:
           type: object
-          additionalProperties: false
           properties:
             self:
               type: string
               format: uri
             law:
-              type: string
+              type:
+                - string
+                - "null"
               format: uri
-              nullable: true
             regulation:
-              type: string
+              type:
+                - string
+                - "null"
               format: uri
-              nullable: true
-      required: [type, score, title, links]
+      required:
+        - type
+        - score
+        - title
+        - links
 
     SearchResults:
       type: object
@@ -791,6 +859,8 @@ components:
           minimum: 1
         page_size:
           type: integer
+          minimum: 1
+          maximum: 200
         total:
           type: integer
           minimum: 0
@@ -798,20 +868,66 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SearchResultItem"
-      required: [query, scope, page, page_size, total, items]
+      required:
+        - query
+        - scope
+        - page
+        - page_size
+        - total
+        - items
 
     Error:
       type: object
+      description: RFC 7807 Problem Details object with extended fields.
+      required:
+        - type
+        - title
+        - status
       properties:
-        error:
+        type:
           type: string
-          description: Machine-readable error code
-          example: not_found
-        message:
+          format: uri
+          description: A URI reference that identifies the problem type.
+          example: "https://api.lovdata.example/errors/not-found"
+        title:
           type: string
-          description: Human-readable error message
-        details:
-          type: object
-          description: Optional structured details
-          additionalProperties: true
-      required: [error, message]
+          description: Short, human-readable summary of the problem type.
+          example: "Not Found"
+        status:
+          type: integer
+          description: HTTP status code generated by the origin server.
+          minimum: 100
+          maximum: 599
+          example: 404
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+        instance:
+          type: string
+          format: uri
+          description: URI reference that identifies this specific occurrence.
+        correlationId:
+          type: string
+          description: Correlation identifier for logging and tracing.
+          example: "req-41cdd9a2"
+        errors:
+          type: array
+          description: Optional list of field-level validation errors.
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                description: Path or name of the offending field.
+                example: "page_size"
+              message:
+                type: string
+                description: Validation error message for this field.
+                example: "page_size must be between 1 and 200."
+        timestamp:
+          type: string
+          format: date-time
+          description: Time at which the error occurred (RFC 3339 format).
