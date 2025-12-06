@@ -1,0 +1,817 @@
+openapi: 3.1.0
+info:
+  title: Lovdata Best Practice API
+  version: "1.0.0"
+  description: |
+    A modern, best-practice REST API design for accessing Norwegian laws and central
+    regulations, built from Lovdata's public datasets.
+
+    This specification is **not** the official Lovdata API, but a demonstration of how
+    their data could be exposed in a clean, developer-friendly way.
+
+    ## Design Goals
+
+    - Resource-oriented URLs (`/laws`, `/regulations`, `/sections`, `/search`)
+    - Consistent pagination and filtering
+    - Hypermedia-style `links` inside responses
+    - JSON-first, with optional HTML representations
+    - Explicit rate-limit headers
+
+  contact:
+    name: API Maintainer
+    url: https://github.com/your-org/lovdata-best-practice-api
+    email: you@example.com
+  license:
+    name: Creative Commons Attribution 4.0 International
+    identifier: CC-BY-4.0
+
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+
+servers:
+  - url: https://api.lovdata.example/v1
+    description: Example production server
+  - url: http://localhost:8000/v1
+    description: Local development server
+
+tags:
+  - name: Laws
+    description: Access to consolidated laws
+  - name: Regulations
+    description: Access to central regulations
+  - name: Sections
+    description: Access to individual sections (§) of laws and regulations
+  - name: Search
+    description: Full-text and structured search
+  - name: Metadata
+    description: Service metadata and health
+
+paths:
+  /laws:
+    get:
+      tags: [Laws]
+      summary: List laws
+      description: |
+        Returns a paginated list of laws.
+
+        Use filters to narrow the result set, for example by year, status, or free text.
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/pageSize"
+        - name: q
+          in: query
+          description: Free-text search in title and short title
+          schema:
+            type: string
+        - name: year
+          in: query
+          description: Filter by year of main enactment date
+          schema:
+            type: integer
+            minimum: 1600
+        - name: status
+          in: query
+          description: Filter by legal status
+          schema:
+            type: string
+            enum: [active, repealed, historical]
+        - name: sort
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum:
+              - date_asc
+              - date_desc
+              - title_asc
+              - title_desc
+            default: title_asc
+      responses:
+        "200":
+          description: Paginated list of law summaries
+          headers:
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedLawList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /laws/{lawId}:
+    get:
+      tags: [Laws]
+      summary: Get a law
+      description: |
+        Returns a single consolidated law, including metadata and an ordered list
+        of its sections.
+
+        The `lawId` is a normalized identifier, for example: `lov-1884-06-14-3`.
+      parameters:
+        - $ref: "#/components/parameters/lawId"
+      responses:
+        "200":
+          description: A single law
+          headers:
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Law"
+            text/html:
+              description: Pre-rendered HTML representation of the law
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /laws/{lawId}/sections:
+    get:
+      tags: [Sections]
+      summary: List sections of a law
+      description: |
+        Returns all sections (§) of a specific law, as a paginated list.
+
+        This is useful when you want to navigate a law structurally, or fetch
+        sections lazily.
+      parameters:
+        - $ref: "#/components/parameters/lawId"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/pageSize"
+      responses:
+        "200":
+          description: Sections of a law
+          headers:
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedSectionList"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /laws/{lawId}/sections/{sectionNumber}:
+    get:
+      tags: [Sections]
+      summary: Get a section of a law
+      description: |
+        Returns a single section (§) of a law, including its ledd (paragraphs),
+        notes and cross-references.
+      parameters:
+        - $ref: "#/components/parameters/lawId"
+        - $ref: "#/components/parameters/sectionNumber"
+      responses:
+        "200":
+          description: A single section of a law
+          headers:
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Section"
+            text/html:
+              description: Pre-rendered HTML representation of the section
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /regulations:
+    get:
+      tags: [Regulations]
+      summary: List regulations
+      description: |
+        Returns a paginated list of central regulations.
+
+        Use filters to narrow the result set by year, status, or free text.
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/pageSize"
+        - name: q
+          in: query
+          description: Free-text search in title and short title
+          schema:
+            type: string
+        - name: year
+          in: query
+          description: Filter by year of main enactment date
+          schema:
+            type: integer
+            minimum: 1600
+        - name: status
+          in: query
+          description: Filter by legal status
+          schema:
+            type: string
+            enum: [active, repealed, historical]
+        - name: sort
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum:
+              - date_asc
+              - date_desc
+              - title_asc
+              - title_desc
+            default: title_asc
+      responses:
+        "200":
+          description: Paginated list of regulation summaries
+          headers:
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedRegulationList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /regulations/{regulationId}:
+    get:
+      tags: [Regulations]
+      summary: Get a regulation
+      description: |
+        Returns a single consolidated regulation, including metadata and an ordered
+        list of its sections.
+      parameters:
+        - $ref: "#/components/parameters/regulationId"
+      responses:
+        "200":
+          description: A single regulation
+          headers:
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Regulation"
+            text/html:
+              description: Pre-rendered HTML representation of the regulation
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /regulations/{regulationId}/sections:
+    get:
+      tags: [Sections]
+      summary: List sections of a regulation
+      parameters:
+        - $ref: "#/components/parameters/regulationId"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/pageSize"
+      responses:
+        "200":
+          description: Sections of a regulation
+          headers:
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedSectionList"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /regulations/{regulationId}/sections/{sectionNumber}:
+    get:
+      tags: [Sections]
+      summary: Get a section of a regulation
+      parameters:
+        - $ref: "#/components/parameters/regulationId"
+        - $ref: "#/components/parameters/sectionNumber"
+      responses:
+        "200":
+          description: A single section of a regulation
+          headers:
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Section"
+            text/html:
+              description: Pre-rendered HTML representation of the section
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /search:
+    get:
+      tags: [Search]
+      summary: Search laws and regulations
+      description: |
+        Full-text search across laws and regulations.
+
+        Supports limiting to specific document types and basic ranking options.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query string
+          schema:
+            type: string
+            minLength: 1
+        - name: scope
+          in: query
+          description: Limit search to specific types
+          schema:
+            type: string
+            enum: [laws, regulations, all]
+            default: all
+        - name: include
+          in: query
+          description: |
+            Comma-separated list of related entities to include in the response.
+            For example: `law` will embed brief law metadata inside results.
+          schema:
+            type: string
+            example: "law"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/pageSize"
+      responses:
+        "200":
+          description: Search results
+          headers:
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResults"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /status:
+    get:
+      tags: [Metadata]
+      summary: API status and version
+      description: |
+        Lightweight endpoint for monitoring API availability and versioning.
+      responses:
+        "200":
+          description: Service status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Status"
+
+components:
+  parameters:
+    lawId:
+      name: lawId
+      in: path
+      required: true
+      description: Normalized law identifier, e.g. `lov-1884-06-14-3`.
+      schema:
+        type: string
+        pattern: "^lov-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]+$"
+    regulationId:
+      name: regulationId
+      in: path
+      required: true
+      description: Normalized regulation identifier, e.g. `forskrift-2006-10-27-1196`.
+      schema:
+        type: string
+        pattern: "^forskrift-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]+$"
+    sectionNumber:
+      name: sectionNumber
+      in: path
+      required: true
+      description: Section number (without the § symbol), e.g. `1`, `2`, `3a`.
+      schema:
+        type: string
+        example: "1"
+    page:
+      name: page
+      in: query
+      description: 1-based page number
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    pageSize:
+      name: page_size
+      in: query
+      description: Number of items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+
+  headers:
+    X-RateLimit-Limit:
+      description: Maximum number of requests allowed in the current window.
+      schema:
+        type: integer
+        example: 200
+    X-RateLimit-Remaining:
+      description: Number of requests remaining in the current window.
+      schema:
+        type: integer
+        example: 199
+    X-RateLimit-Reset:
+      description: UNIX timestamp when the current rate limit window resets.
+      schema:
+        type: integer
+        example: 1700000123
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            notFound:
+              summary: Resource not found
+              value:
+                error: not_found
+                message: Resource not found
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            badRequest:
+              summary: Invalid query parameter
+              value:
+                error: bad_request
+                message: Invalid `page_size` parameter, must be between 1 and 200.
+
+  schemas:
+    Status:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        version:
+          type: string
+          example: "1.0.0"
+        lastDatasetUpdate:
+          type: string
+          format: date
+          description: Date of the latest underlying dataset update.
+      required: [status, version]
+
+    LawSummary:
+      type: object
+      description: Short representation of a law used in lists.
+      properties:
+        id:
+          type: string
+          description: Law identifier (`lawId`)
+          example: "lov-1884-06-14-3"
+        refId:
+          type: string
+          description: Original refID from dataset
+          example: "lov/1884-06-14-3"
+        title:
+          type: string
+        shortTitle:
+          type: string
+        date:
+          type: string
+          format: date
+          description: Main enactment date
+        status:
+          type: string
+          enum: [active, repealed, historical]
+        ministry:
+          type: array
+          items:
+            type: string
+        links:
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+              format: uri
+              example: "https://api.lovdata.example/v1/laws/lov-1884-06-14-3"
+            html:
+              type: string
+              format: uri
+              example: "https://lovdata.example.no/laws/lov-1884-06-14-3"
+      required: [id, title, date, status, links]
+
+    Law:
+      allOf:
+        - $ref: "#/components/schemas/LawSummary"
+        - type: object
+          properties:
+            sections:
+              type: array
+              description: Ordered list of sections in the law.
+              items:
+                $ref: "#/components/schemas/SectionSummary"
+            notes:
+              type: array
+              items:
+                type: string
+            metadata:
+              type: object
+              description: Additional metadata extracted from the dataset.
+              additionalProperties: true
+
+    RegulationSummary:
+      type: object
+      description: Short representation of a regulation used in lists.
+      properties:
+        id:
+          type: string
+          description: Regulation identifier (`regulationId`)
+          example: "forskrift-2006-10-27-1196"
+        refId:
+          type: string
+          description: Original refID from dataset
+          example: "forskrift/2006-10-27-1196"
+        title:
+          type: string
+        shortTitle:
+          type: string
+        date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [active, repealed, historical]
+        ministry:
+          type: array
+          items:
+            type: string
+        links:
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+              format: uri
+              example: "https://api.lovdata.example/v1/regulations/forskrift-2006-10-27-1196"
+            html:
+              type: string
+              format: uri
+      required: [id, title, date, status, links]
+
+    Regulation:
+      allOf:
+        - $ref: "#/components/schemas/RegulationSummary"
+        - type: object
+          properties:
+            sections:
+              type: array
+              description: Ordered list of sections in the regulation.
+              items:
+                $ref: "#/components/schemas/SectionSummary"
+            notes:
+              type: array
+              items:
+                type: string
+            metadata:
+              type: object
+              additionalProperties: true
+
+    SectionSummary:
+      type: object
+      description: Minimal representation of a section.
+      properties:
+        lawId:
+          type: string
+          nullable: true
+        regulationId:
+          type: string
+          nullable: true
+        number:
+          type: string
+          example: "1"
+        label:
+          type: string
+          example: "§ 1"
+        title:
+          type: string
+          nullable: true
+        links:
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+              format: uri
+            law:
+              type: string
+              format: uri
+              nullable: true
+            regulation:
+              type: string
+              format: uri
+              nullable: true
+      required: [number, label, links]
+
+    Section:
+      allOf:
+        - $ref: "#/components/schemas/SectionSummary"
+        - type: object
+          properties:
+            ledd:
+              type: array
+              description: List of paragraphs (*ledd*) within the section.
+              items:
+                type: string
+            changes:
+              type: array
+              description: Notes about amendments and historical changes.
+              items:
+                type: string
+            fullText:
+              type: string
+              description: Full plain-text representation of the section.
+              example: "Blir det i forbindelse med nedleggelse eller reparasjon ..."
+            references:
+              type: array
+              items:
+                type: object
+                properties:
+                  refId:
+                    type: string
+                    example: "lov/1996-06-28-39"
+                  type:
+                    type: string
+                    example: "law"
+                  label:
+                    type: string
+                    example: "lov 28 juni 1996 nr. 39"
+                  href:
+                    type: string
+                    format: uri
+                    example: "https://api.lovdata.example/v1/laws/lov-1996-06-28-39"
+            metadata:
+              type: object
+              additionalProperties: true
+
+    PaginatedLawList:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        page_size:
+          type: integer
+        total:
+          type: integer
+          minimum: 0
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/LawSummary"
+      required: [page, page_size, total, items]
+
+    PaginatedRegulationList:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        page_size:
+          type: integer
+        total:
+          type: integer
+          minimum: 0
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RegulationSummary"
+      required: [page, page_size, total, items]
+
+    PaginatedSectionList:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        page_size:
+          type: integer
+        total:
+          type: integer
+          minimum: 0
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SectionSummary"
+      required: [page, page_size, total, items]
+
+    SearchResultItem:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [law, regulation, section]
+        score:
+          type: number
+          format: float
+        lawId:
+          type: string
+          nullable: true
+        regulationId:
+          type: string
+          nullable: true
+        sectionNumber:
+          type: string
+          nullable: true
+        title:
+          type: string
+        snippet:
+          type: string
+          description: Text fragment with query terms highlighted or centered.
+        links:
+          type: object
+          additionalProperties: false
+          properties:
+            self:
+              type: string
+              format: uri
+            law:
+              type: string
+              format: uri
+              nullable: true
+            regulation:
+              type: string
+              format: uri
+              nullable: true
+      required: [type, score, title, links]
+
+    SearchResults:
+      type: object
+      properties:
+        query:
+          type: string
+        scope:
+          type: string
+          enum: [laws, regulations, all]
+        page:
+          type: integer
+          minimum: 1
+        page_size:
+          type: integer
+        total:
+          type: integer
+          minimum: 0
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResultItem"
+      required: [query, scope, page, page_size, total, items]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Machine-readable error code
+          example: not_found
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Optional structured details
+          additionalProperties: true
+      required: [error, message]
