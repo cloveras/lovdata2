@@ -16,15 +16,15 @@ alternative API designs.
 
 ## API
 
-The [Lovdata API]((https://api.lovdata.no/swagger).) is, technically speaking, a ‘REST API’,
-but it behaves more like a download service than something that actually follows REST principles:
-The URIs, methods, and structure feel more like
-‘hey, here are some files’ than a clean, resource-oriented interface.”
+The [Lovdata API]((https://api.lovdata.no/swagger).) is, technically speaking, a "REST API",
+but it behaves more like a file download service than something that actually follows REST principles:
+The URIs, methods, and structure feel more like "hey, here are some files" than a clean, resource-oriented interface.
 
 The goal here is to illustrate how Norwegian laws and regulations could be exposed through a
 clean, predictable, developer-friendly REST interface, in
-[OpenAPI 3.1](https://github.com/cloveras/lovdata2/blob/main/openapi/lovdata-api.yaml)
-and [Swagger UI](https://cloveras.github.io/lovdata2/api.html).
+[Swagger UI](https://cloveras.github.io/lovdata2/api.html)
+amd
+[OpenAPI 3.1](https://github.com/cloveras/lovdata2/blob/main/openapi/lovdata-api.yaml).
 
 ## Scripts
 
