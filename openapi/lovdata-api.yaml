@@ -9,17 +9,7 @@ info:
     This specification is **not** the official Lovdata API, but a demonstration of how
     their data could be exposed in a clean, developer-friendly way.
 
-    ## Design Goals
-
-    - Resource-oriented URLs (`/laws`, `/regulations`, `/sections`, `/search`)
-    - Consistent pagination and filtering
-    - Hypermedia-style `links` inside responses
-    - JSON-first, with optional HTML representations
-    - Explicit rate-limit headers
-
-  license:
-    name: Creative Commons Attribution 4.0 International
-    identifier: CC-BY-4.0
+    More information: https://github.com/cloveras/lovdata2
 
 servers:
   - url: https://api.lovdata.example/v1
