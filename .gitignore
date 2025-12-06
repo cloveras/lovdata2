@@ -1,25 +1,14 @@
-# Never commit raw Lovdata data
+cat > .gitignore << 'EOF'
 raw/
-
-# Virtual environments
+data/*
+!data/examples/
+!data/cleaned/
 venv/
-
-# Python cache
 __pycache__/
 *.pyc
-
-# macOS junk
 .DS_Store
-
-# Editor settings
 .idea/
 .vscode/
-
-# Old scripts archive
 scripts/old/
-
-# Logs and temporary files
 *.log
-
-# Accidental leftover files
-index.html
+EOF
