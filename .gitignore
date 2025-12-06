@@ -1,14 +1,35 @@
-cat > .gitignore << 'EOF'
-raw/
-data/*
-!data/examples/
-!data/cleaned/
-venv/
+### Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+venv/
+
+### Node
+node_modules/
+
+### macOS
 .DS_Store
+
+### IDE files
 .idea/
 .vscode/
-scripts/old/
+
+### Logs
 *.log
-EOF
+
+### Raw data (never commit)
+raw/
+
+### Generated dataset (ignored except whitelisted folders)
+data/**
+!data/examples/
+!data/examples/**
+!data/cleaned/
+!data/cleaned/**
+
+### Generated OpenAPI JSON
+openapi/lovdata-api.json
+
+### Old/deprecated scripts
+scripts/old/
