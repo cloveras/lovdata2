@@ -23,7 +23,7 @@ The URIs, methods, and structure feel more like "hey, here are some files" than 
 The goal here is to illustrate how Norwegian laws and regulations could be exposed through a
 clean, predictable, developer-friendly REST interface, in
 [Swagger UI](https://cloveras.github.io/lovdata2/api.html)
-amd
+and
 [OpenAPI 3.1](https://github.com/cloveras/lovdata2/blob/main/openapi/lovdata-api.yaml).
 
 ## Scripts
